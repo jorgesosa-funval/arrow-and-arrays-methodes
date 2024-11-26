@@ -2,20 +2,21 @@ import data from "./data.js"
 const filterOptions = document.querySelector('#filter-options')
 const optionList = document.querySelector('#option-list')
 const searchFilter = document.querySelector('#search-filter')
-
+const bookElement = document.querySelector('#book-list')
+const loadMore = document.querySelector('#load-more')
+const searchBook = document.querySelector('#search-book')
 const categoryList = categories()
 const authorList = authors()
 
+
 let selectedFilter = 'categorias'
-// utiliza filter y realiza un filtro que muestre todos los libros cuya cantidad de pagina sea menor a 220 - bryan
+let loadLimit = 10
+
 function filtrar() {
     let books = data.filter((book) => book.pageCount < 220)
     console.log(books);
     return books
 }
-
-
-// utiliza (map-foreach) y muestra todas las categorias de libros que hay en el array sin repetir ninguna categoria - victor
 
 function categories() {
     const ct = []
@@ -43,6 +44,28 @@ function loadFilterOptions(value) {
     })
 }
 
+/**
+ * Itera el array y muestra los resultado en la lista de libros
+ * @param {Array} value 
+ */
+function loadBooks(value) {
+    bookElement.innerHTML = ""
+    value.slice(0,loadLimit).forEach((book) => {
+        const {_id, title ,thumbnailUrl ,shortDescription } = book
+        const itemtemplate = `
+             <div class="col" id="${_id}" >
+                <div class="card">
+                    <img src="${thumbnailUrl}" class="card-img-top object-fit-cover" alt="${title}" height="260">
+                    <div class="card-body" style="height: 160px;">
+                        <h5 class="card-title">${title}</h5>
+                        <p class="card-text">${""}</p>
+                    </div>
+                </div>
+            </div>
+        `
+        bookElement.innerHTML += itemtemplate
+    })
+}
 
 function authors() {
     const ats = []
@@ -70,8 +93,7 @@ function filtrarCategorias(category) {
 
 function filterAutor(author) {
     let results = data.filter((element) => element.authors.includes(author));
-    console.log(results);
-    return autor
+    return results
 }
 
 function miId(id) {
@@ -80,13 +102,12 @@ function miId(id) {
     return indexbook
 }
 
-
 filterOptions.addEventListener('change', (e) => {
     const value = e.target.value
 
     if (value === 'categorias') {
         selectedFilter = 'categorias'
-       loadFilterOptions(categoryList)
+        loadFilterOptions(categoryList)
     } else {
         selectedFilter = 'autores'
         loadFilterOptions(authorList)
@@ -95,13 +116,13 @@ filterOptions.addEventListener('change', (e) => {
 
 searchFilter.addEventListener('input', (e) => {
     const value = e.target.value
- 
+
     if (selectedFilter === 'categorias') {
         const filteredCategories = categoryList.filter((category) => {
             return category.toLowerCase().includes(value.toLowerCase())
         })
         loadFilterOptions(filteredCategories)
-    }else{
+    } else {
         const filteredAuthors = authorList.filter((author) => {
             return author.toLowerCase().includes(value.toLowerCase())
         })
@@ -109,6 +130,10 @@ searchFilter.addEventListener('input', (e) => {
     }
 })
 
-
+loadMore.addEventListener('click', ()=>{
+    loadLimit+=10
+    loadBooks(data)
+})
 
 loadFilterOptions(categoryList)
+loadBooks(data)
